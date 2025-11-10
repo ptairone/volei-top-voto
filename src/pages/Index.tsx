@@ -3,6 +3,7 @@ import { Results } from '@/components/Results';
 import { AdminControl } from '@/components/AdminControl';
 import { useVoting, VoteCategory } from '@/hooks/useVoting';
 import { useToast } from '@/hooks/use-toast';
+import turmaVoleiLogo from '@/assets/turma-volei-logo.jpeg';
 
 const Index = () => {
   const { hasVotedInCategory, submitVote, getResults, totalVotes, votedCategories, resultsReleased, toggleResultsRelease } = useVoting();
@@ -32,8 +33,15 @@ const Index = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <img 
+              src={turmaVoleiLogo} 
+              alt="Turma do Vôlei Logo" 
+              className="w-32 h-32 md:w-40 md:h-40 object-contain"
+            />
+          </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            🏐 Turma do Vôlei
+            Turma do Vôlei
           </h1>
           <p className="text-xl text-muted-foreground mb-2">
             Melhores do Ano - Votação Anônima
