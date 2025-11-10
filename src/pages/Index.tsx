@@ -1,10 +1,11 @@
 import { VotingCard } from '@/components/VotingCard';
 import { Results } from '@/components/Results';
+import { AdminControl } from '@/components/AdminControl';
 import { useVoting, VoteCategory } from '@/hooks/useVoting';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const { hasVotedInCategory, submitVote, getResults, totalVotes, votedCategories } = useVoting();
+  const { hasVotedInCategory, submitVote, getResults, totalVotes, votedCategories, resultsReleased, toggleResultsRelease } = useVoting();
   const { toast } = useToast();
 
   const handleVote = (category: VoteCategory, candidate: string) => {
@@ -73,7 +74,10 @@ const Index = () => {
         </div>
 
         {/* Results */}
-        <Results results={results} totalVotes={totalVotes} />
+        <Results results={results} totalVotes={totalVotes} isReleased={resultsReleased} />
+
+        {/* Admin Control */}
+        <AdminControl resultsReleased={resultsReleased} onToggleResults={toggleResultsRelease} />
       </div>
     </div>
   );

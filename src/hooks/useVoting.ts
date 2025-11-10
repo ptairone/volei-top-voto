@@ -18,11 +18,16 @@ interface VoteResults {
 
 const STORAGE_KEY = 'turma-volei-votes';
 const FINGERPRINT_KEY = 'turma-volei-fingerprint';
+const RESULTS_RELEASED_KEY = 'turma-volei-results-released';
 
 export const useVoting = () => {
   const [votedCategories, setVotedCategories] = useState<Set<VoteCategory>>(new Set());
   const [fingerprint, setFingerprint] = useState<string>('');
   const [votes, setVotes] = useState<Vote[]>([]);
+  const [resultsReleased, setResultsReleased] = useState<boolean>(() => {
+    const stored = localStorage.getItem(RESULTS_RELEASED_KEY);
+    return stored === 'true';
+  });
 
   useEffect(() => {
     const initFingerprint = async () => {
@@ -95,11 +100,19 @@ export const useVoting = () => {
     return results;
   };
 
+  const toggleResultsRelease = () => {
+    const newState = !resultsReleased;
+    setResultsReleased(newState);
+    localStorage.setItem(RESULTS_RELEASED_KEY, String(newState));
+  };
+
   return {
     hasVotedInCategory,
     submitVote,
     getResults,
     totalVotes: votes.length,
     votedCategories,
+    resultsReleased,
+    toggleResultsRelease,
   };
 };
