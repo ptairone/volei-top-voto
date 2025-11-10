@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { generateFingerprint } from '@/utils/fingerprint';
+import { generateVoteCode } from '@/utils/whatsappConfirmation';
 
 export type VoteCategory = 'melhor-saque' | 'mais-reclamao' | 'mais-gente-boa';
+export type VoteStatus = 'pending' | 'confirmed' | 'rejected';
 
 interface Vote {
+  voteCode: string;
   category: VoteCategory;
   candidate: string;
   timestamp: number;
   fingerprint: string;
+  status: VoteStatus;
 }
 
 interface VoteResults {
@@ -58,16 +62,19 @@ export const useVoting = () => {
     initFingerprint();
   }, []);
 
-  const submitVote = (category: VoteCategory, candidate: string) => {
+  const submitVote = (category: VoteCategory, candidate: string): string | null => {
     if (votedCategories.has(category)) {
-      return false;
+      return null;
     }
 
+    const voteCode = generateVoteCode();
     const newVote: Vote = {
+      voteCode,
       category,
       candidate,
       timestamp: Date.now(),
       fingerprint,
+      status: 'pending',
     };
 
     const updatedVotes = [...votes, newVote];
@@ -75,7 +82,7 @@ export const useVoting = () => {
     setVotes(updatedVotes);
     setVotedCategories(new Set([...votedCategories, category]));
     
-    return true;
+    return voteCode;
   };
   
   const hasVotedInCategory = (category: VoteCategory) => {
@@ -86,6 +93,9 @@ export const useVoting = () => {
     const results: VoteResults = {};
     
     votes.forEach(vote => {
+      // Only count confirmed votes
+      if (vote.status !== 'confirmed') return;
+      
       if (!results[vote.category]) {
         results[vote.category] = {};
       }
@@ -100,6 +110,27 @@ export const useVoting = () => {
     return results;
   };
 
+  const getVotesByStatus = (status?: VoteStatus) => {
+    if (!status) return votes;
+    return votes.filter(v => v.status === status);
+  };
+
+  const confirmVote = (voteCode: string) => {
+    const updatedVotes = votes.map(v =>
+      v.voteCode === voteCode ? { ...v, status: 'confirmed' as VoteStatus } : v
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedVotes));
+    setVotes(updatedVotes);
+  };
+
+  const rejectVote = (voteCode: string) => {
+    const updatedVotes = votes.map(v =>
+      v.voteCode === voteCode ? { ...v, status: 'rejected' as VoteStatus } : v
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedVotes));
+    setVotes(updatedVotes);
+  };
+
   const toggleResultsRelease = () => {
     const newState = !resultsReleased;
     setResultsReleased(newState);
@@ -110,7 +141,13 @@ export const useVoting = () => {
     hasVotedInCategory,
     submitVote,
     getResults,
+    getVotesByStatus,
+    confirmVote,
+    rejectVote,
     totalVotes: votes.length,
+    totalConfirmedVotes: votes.filter(v => v.status === 'confirmed').length,
+    totalPendingVotes: votes.filter(v => v.status === 'pending').length,
+    totalRejectedVotes: votes.filter(v => v.status === 'rejected').length,
     votedCategories,
     resultsReleased,
     toggleResultsRelease,

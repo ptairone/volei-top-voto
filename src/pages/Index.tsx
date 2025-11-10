@@ -1,32 +1,37 @@
+import { useState } from 'react';
 import { VotingCard } from '@/components/VotingCard';
 import { Results } from '@/components/Results';
 import { AdminControl } from '@/components/AdminControl';
 import { useVoting, VoteCategory } from '@/hooks/useVoting';
 import { useToast } from '@/hooks/use-toast';
 import turmaVoleiLogo from '@/assets/turma-volei-logo.jpeg';
+import { isAdminAuthenticated } from '@/utils/adminAuth';
 
 const Index = () => {
-  const { hasVotedInCategory, submitVote, getResults, totalVotes, votedCategories, resultsReleased, toggleResultsRelease } = useVoting();
+  const { 
+    hasVotedInCategory, 
+    submitVote, 
+    getResults, 
+    totalVotes,
+    totalConfirmedVotes,
+    totalPendingVotes,
+    votedCategories, 
+    resultsReleased, 
+    toggleResultsRelease,
+    getVotesByStatus,
+    confirmVote,
+    rejectVote,
+  } = useVoting();
   const { toast } = useToast();
 
   const handleVote = (category: VoteCategory, candidate: string) => {
-    const success = submitVote(category, candidate);
-    
-    if (success) {
-      toast({
-        title: '✅ Voto registrado!',
-        description: 'Obrigado por participar da votação da Turma do Vôlei!',
-      });
-    } else {
-      toast({
-        title: '❌ Erro',
-        description: 'Você já votou anteriormente.',
-        variant: 'destructive',
-      });
-    }
+    const voteCode = submitVote(category, candidate);
+    return voteCode;
   };
 
   const results = getResults();
+  const allVotes = getVotesByStatus();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 court-pattern relative overflow-hidden">
@@ -97,10 +102,23 @@ const Index = () => {
         </div>
 
         {/* Results */}
-        <Results results={results} totalVotes={totalVotes} isReleased={resultsReleased} />
+        <Results 
+          results={results} 
+          totalVotes={totalVotes}
+          totalConfirmedVotes={totalConfirmedVotes}
+          totalPendingVotes={totalPendingVotes}
+          isReleased={resultsReleased}
+          isAdmin={isAdminAuthenticated()}
+        />
 
         {/* Admin Control */}
-        <AdminControl resultsReleased={resultsReleased} onToggleResults={toggleResultsRelease} />
+        <AdminControl 
+          resultsReleased={resultsReleased} 
+          onToggleResults={toggleResultsRelease}
+          votes={allVotes}
+          onConfirmVote={confirmVote}
+          onRejectVote={rejectVote}
+        />
       </div>
     </div>
   );

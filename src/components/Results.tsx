@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Lock, Share2 } from 'lucide-react';
 
 interface ResultsProps {
@@ -10,7 +11,10 @@ interface ResultsProps {
     };
   };
   totalVotes: number;
+  totalConfirmedVotes: number;
+  totalPendingVotes: number;
   isReleased: boolean;
+  isAdmin?: boolean;
 }
 
 const categoryNames: { [key: string]: string } = {
@@ -19,7 +23,7 @@ const categoryNames: { [key: string]: string } = {
   'mais-gente-boa': '😊 Mais Gente Boa',
 };
 
-export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
+export const Results = ({ results, totalVotes, totalConfirmedVotes, totalPendingVotes, isReleased, isAdmin }: ResultsProps) => {
   const handleShareWhatsApp = () => {
     let message = `🏐 *Turma do Vôlei - Resultados da Votação*\n\n`;
     message += `Total de ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}\n\n`;
@@ -111,10 +115,22 @@ export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
   return (
     <Card className="mt-8 border-2 border-primary/50 shadow-2xl shadow-primary/20 animate-fade-in-up">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            🏆 Resultados - Total de {totalVotes} votos
-          </CardTitle>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="space-y-2">
+            <CardTitle className="flex items-center gap-2">
+              🏆 Resultados
+            </CardTitle>
+            <div className="flex gap-2 flex-wrap">
+              <Badge className="bg-green-500">
+                ✅ {totalConfirmedVotes} Confirmados
+              </Badge>
+              {isAdmin && totalPendingVotes > 0 && (
+                <Badge className="bg-yellow-500">
+                  ⏳ {totalPendingVotes} Pendentes
+                </Badge>
+              )}
+            </div>
+          </div>
           <Button
             onClick={handleShareWhatsApp}
             variant="outline"
