@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Lock, Share2 } from 'lucide-react';
 
 interface ResultsProps {
   results: {
@@ -19,6 +20,30 @@ const categoryNames: { [key: string]: string } = {
 };
 
 export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
+  const handleShareWhatsApp = () => {
+    let message = `🏐 *Turma do Vôlei - Resultados da Votação*\n\n`;
+    message += `Total de ${totalVotes} ${totalVotes === 1 ? 'voto' : 'votos'}\n\n`;
+
+    Object.entries(results).forEach(([category, candidates]) => {
+      const categoryName = categoryNames[category] || category;
+      message += `*${categoryName}*\n`;
+      
+      const sortedCandidates = Object.entries(candidates).sort(
+        ([, a], [, b]) => b - a
+      );
+
+      sortedCandidates.forEach(([candidate, votes], index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '▫️';
+        message += `${medal} ${candidate}: ${votes} ${votes === 1 ? 'voto' : 'votos'}\n`;
+      });
+      
+      message += '\n';
+    });
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   if (totalVotes === 0) {
     return (
       <Card className="mt-8">
@@ -86,7 +111,18 @@ export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
   return (
     <Card className="mt-8">
       <CardHeader>
-        <CardTitle>Resultados - Total de {totalVotes} votos</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Resultados - Total de {totalVotes} votos</CardTitle>
+          <Button
+            onClick={handleShareWhatsApp}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            Compartilhar no WhatsApp
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {Object.entries(results).map(([category, candidates]) => {
