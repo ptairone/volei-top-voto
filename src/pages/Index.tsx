@@ -4,7 +4,7 @@ import { useVoting, VoteCategory } from '@/hooks/useVoting';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const { hasVoted, submitVote, getResults, totalVotes } = useVoting();
+  const { hasVotedInCategory, submitVote, getResults, totalVotes, votedCategories } = useVoting();
   const { toast } = useToast();
 
   const handleVote = (category: VoteCategory, candidate: string) => {
@@ -38,7 +38,9 @@ const Index = () => {
             Melhores do Ano - Votação Anônima
           </p>
           <p className="text-sm text-muted-foreground">
-            {hasVoted ? '✅ Você já votou! Veja os resultados abaixo.' : '📊 Vote apenas uma vez por dispositivo'}
+            {votedCategories.size === 3 
+              ? '✅ Você votou em todas as categorias! Veja os resultados abaixo.' 
+              : `📊 Vote uma vez em cada categoria (${votedCategories.size}/3 categorias votadas)`}
           </p>
         </div>
 
@@ -50,7 +52,7 @@ const Index = () => {
             description="Quem tem o saque mais poderoso?"
             icon="🏐"
             onVote={handleVote}
-            disabled={hasVoted}
+            hasVotedInCategory={hasVotedInCategory('melhor-saque')}
           />
           <VotingCard
             category="mais-reclamao"
@@ -58,7 +60,7 @@ const Index = () => {
             description="Quem reclama de tudo? 😅"
             icon="😤"
             onVote={handleVote}
-            disabled={hasVoted}
+            hasVotedInCategory={hasVotedInCategory('mais-reclamao')}
           />
           <VotingCard
             category="mais-gente-boa"
@@ -66,7 +68,7 @@ const Index = () => {
             description="Quem é o mais parceiro?"
             icon="😊"
             onVote={handleVote}
-            disabled={hasVoted}
+            hasVotedInCategory={hasVotedInCategory('mais-gente-boa')}
           />
         </div>
 

@@ -11,7 +11,7 @@ interface VotingCardProps {
   description: string;
   icon: string;
   onVote: (category: VoteCategory, candidate: string) => void;
-  disabled: boolean;
+  hasVotedInCategory: boolean;
 }
 
 export const VotingCard = ({
@@ -20,7 +20,7 @@ export const VotingCard = ({
   description,
   icon,
   onVote,
-  disabled,
+  hasVotedInCategory,
 }: VotingCardProps) => {
   const [candidate, setCandidate] = useState('');
 
@@ -48,16 +48,16 @@ export const VotingCard = ({
               value={candidate}
               onChange={(e) => setCandidate(e.target.value)}
               placeholder="Digite o nome..."
-              disabled={disabled}
+              disabled={hasVotedInCategory}
               maxLength={50}
             />
           </div>
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={disabled || !candidate.trim()}
+            disabled={hasVotedInCategory || !candidate.trim()}
           >
-            {disabled ? 'Você já votou' : 'Votar'}
+            {hasVotedInCategory ? 'Você já votou aqui' : 'Votar'}
           </Button>
         </form>
       </CardContent>

@@ -20,7 +20,7 @@ const STORAGE_KEY = 'turma-volei-votes';
 const FINGERPRINT_KEY = 'turma-volei-fingerprint';
 
 export const useVoting = () => {
-  const [hasVoted, setHasVoted] = useState(false);
+  const [votedCategories, setVotedCategories] = useState<Set<VoteCategory>>(new Set());
   const [fingerprint, setFingerprint] = useState<string>('');
   const [votes, setVotes] = useState<Vote[]>([]);
 
@@ -35,14 +35,18 @@ export const useVoting = () => {
       
       setFingerprint(storedFingerprint);
       
-      // Check if this fingerprint has voted
+      // Check which categories this fingerprint has voted in
       const storedVotes = localStorage.getItem(STORAGE_KEY);
       if (storedVotes) {
         const parsedVotes: Vote[] = JSON.parse(storedVotes);
         setVotes(parsedVotes);
         
-        const userVoted = parsedVotes.some(v => v.fingerprint === storedFingerprint);
-        setHasVoted(userVoted);
+        const userVotedCategories = new Set(
+          parsedVotes
+            .filter(v => v.fingerprint === storedFingerprint)
+            .map(v => v.category)
+        );
+        setVotedCategories(userVotedCategories);
       }
     };
     
@@ -50,7 +54,7 @@ export const useVoting = () => {
   }, []);
 
   const submitVote = (category: VoteCategory, candidate: string) => {
-    if (hasVoted) {
+    if (votedCategories.has(category)) {
       return false;
     }
 
@@ -64,9 +68,13 @@ export const useVoting = () => {
     const updatedVotes = [...votes, newVote];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedVotes));
     setVotes(updatedVotes);
-    setHasVoted(true);
+    setVotedCategories(new Set([...votedCategories, category]));
     
     return true;
+  };
+  
+  const hasVotedInCategory = (category: VoteCategory) => {
+    return votedCategories.has(category);
   };
 
   const getResults = (): VoteResults => {
@@ -88,9 +96,10 @@ export const useVoting = () => {
   };
 
   return {
-    hasVoted,
+    hasVotedInCategory,
     submitVote,
     getResults,
     totalVotes: votes.length,
+    votedCategories,
   };
 };
