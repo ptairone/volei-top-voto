@@ -109,15 +109,17 @@ export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
   }
 
   return (
-    <Card className="mt-8">
+    <Card className="mt-8 border-2 border-primary/50 shadow-2xl shadow-primary/20 animate-fade-in-up">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Resultados - Total de {totalVotes} votos</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            🏆 Resultados - Total de {totalVotes} votos
+          </CardTitle>
           <Button
             onClick={handleShareWhatsApp}
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <Share2 className="h-4 w-4" />
             Compartilhar no WhatsApp
@@ -136,18 +138,32 @@ export const Results = ({ results, totalVotes, isReleased }: ResultsProps) => {
               <h3 className="font-semibold text-lg">
                 {categoryNames[category] || category}
               </h3>
-              <div className="space-y-2">
-                {sortedCandidates.map(([candidate, votes]) => (
-                  <div key={candidate} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">{candidate}</span>
-                      <span className="text-muted-foreground">
-                        {votes} {votes === 1 ? 'voto' : 'votos'}
-                      </span>
+              <div className="space-y-3">
+                {sortedCandidates.map(([candidate, votes], index) => {
+                  const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '▫️';
+                  return (
+                    <div key={candidate} className="space-y-1 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="flex justify-between text-sm items-center">
+                        <span className="font-medium flex items-center gap-2">
+                          <span className="text-xl">{medal}</span>
+                          {candidate}
+                        </span>
+                        <span className="text-muted-foreground font-semibold">
+                          {votes} {votes === 1 ? 'voto' : 'votos'}
+                        </span>
+                      </div>
+                      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000 ease-out shadow-lg"
+                          style={{ 
+                            width: `${(votes / maxVotes) * 100}%`,
+                            animation: 'progress-fill 1s ease-out'
+                          }}
+                        />
+                      </div>
                     </div>
-                    <Progress value={(votes / maxVotes) * 100} />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );
